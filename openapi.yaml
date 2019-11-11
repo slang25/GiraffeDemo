@@ -1,0 +1,60 @@
+openapi: 3.0.1
+info:
+  title: GiraffeDemo
+  version: 1.0.0
+paths:
+  /student:
+    get:
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+components:
+  schemas:
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          nullable: true
+        age:
+          type: integer
+          format: int32
+        status:
+          type: string
+          enum: [Active, Inactive]
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Course'
+      required:
+        - id
+        - name
+        - age
+        - stats
+        - course
+    Course:
+      type: object
+      properties:
+        title:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        credits:
+          type: integer
+          format: int32
+          nullable: true
+        enrolmentDate:
+          type: string
+          format: date-time
+      required:
+        - title
+        - enrolmentDate

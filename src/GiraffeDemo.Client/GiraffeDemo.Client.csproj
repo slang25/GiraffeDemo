@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>GiraffeDemo.Client</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.6.0" />
+    <DotNetCliToolReference Include="NSwag.ConsoleCore" Version="13.1.3" />
+  </ItemGroup>
+  <Target Name="GenerateNSwagClient">
+    <ItemGroup>
+      <NSwagInputFiles Include="nswag.json" />
+      <NSwagInputFiles Include="../../openapi.yaml" />
+    </ItemGroup>
+    <PropertyGroup>
+      <ClientName>GiraffeTesting</ClientName>
+      <GeneratedSwaggerClientFile Condition="'$(GeneratedSwaggerClientFile)' ==''">$(IntermediateOutputPath)$(MSBuildProjectName).$(ClientName)Client.cs</GeneratedSwaggerClientFile>
+      <NSwagGenCacheFile>$(IntermediateOutputPath)$(MSBuildProjectName).nswag.cache</NSwagGenCacheFile>
+    </PropertyGroup>
+      <ReadLinesFromFile File="$(NSwagGenCacheFile)">
+          <Output TaskParameter="Lines" ItemName="NSwagGenCacheContents" />
+      </ReadLinesFromFile>
+      <PropertyGroup>
+        <NSwagGenCache>%(NSwagGenCacheContents.Identity)</NSwagGenCache>
+      </PropertyGroup>
+      <GetFileHash Files="@(NSwagInputFiles)" Algorithm="SHA256" HashEncoding="hex">
+        <Output TaskParameter="Items" ItemName="NSwagInputFilesHash" />
+      </GetFileHash>
+      <Hash ItemsToHash="@(NSwagInputFilesHash->'%(FileHash)')">
+			  <Output TaskParameter="HashResult" PropertyName="NSwagInputHash" />
+		  </Hash>
+    <Exec Condition=" '$(NSwagGenCache)' != '$(NSwagInputHash)' Or !Exists('$(GeneratedSwaggerClientFile)') " Command="dotnet nswag run nswag.json /variables:ClientName=$(ClientName),ClientNamespace=$(RootNamespace),GeneratedSwaggerClientFile=$(GeneratedSwaggerClientFile)" />
+    <WriteLinesToFile Condition=" '$(NSwagGenCache)' != '$(NSwagInputHash)' " File="$(NSwagGenCacheFile)" Lines="$(NSwagInputHash)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+  <Target Name="IncludeNSwagClient" BeforeTargets="CoreCompile" DependsOnTargets="GenerateNSwagClient">
+    <ItemGroup Condition="Exists('$(GeneratedSwaggerClientFile)')">
+        <Compile Include="$(GeneratedSwaggerClientFile)" />
+        <FileWrites Include="$(GeneratedSwaggerClientFile)" />
+    </ItemGroup>
+  </Target>
+</Project>
+
+
