@@ -13,30 +13,30 @@ open System.Text.Json
 open System.Text.Json.Serialization
 
 type Student =
-    { id      : int
-      name    : string
-      age     : int
-      status  : StudentStatus
-      courses : List<Course>
+    { Id      : int
+      Name    : string
+      Age     : int
+      Status  : StudentStatus
+      Courses : List<Course>
     }
 and Course =
-    { title         : string
-      enrolmentDate : DateTime }
+    { Title         : string
+      EnrolmentDate : DateTime }
 and StudentStatus =
     | Active
     | Inactive
 
 let studentHandler : HttpHandler =
     fun next ctx ->
-        json { id      = 643
-               name    = "Stuart Lang"
-               age     = 33
-               status  = Active
-               courses = [
-                   { title         = "Course A"
-                     enrolmentDate = DateTime.UtcNow }
-                   { title         = "Course B"
-                     enrolmentDate = DateTime.UtcNow } ]
+        json { Id      = 643
+               Name    = "Stuart Lang"
+               Age     = 33
+               Status  = Active
+               Courses = [
+                   { Title         = "Course A"
+                     EnrolmentDate = DateTime.UtcNow }
+                   { Title         = "Course B"
+                     EnrolmentDate = DateTime.UtcNow } ]
         } next ctx
 
 let webApp =
@@ -49,7 +49,7 @@ let configureApp (app : IApplicationBuilder) =
 
 let configureServices (services : IServiceCollection) =
     services.AddGiraffe() |> ignore
-    let options = JsonSerializerOptions(IgnoreNullValues = true)
+    let options = JsonSerializerOptions(IgnoreNullValues = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase)
     options.Converters.Add(JsonFSharpConverter(JsonUnionEncoding.FSharpLuLike))
     services.AddSingleton<IJsonSerializer>(SystemTextJsonSerializer(options)) |> ignore
 
